@@ -1,0 +1,8 @@
+{
+    "name": "edwinschaap/atmos-php",
+    "description": "PHP wrapper for connecting to EMC Atmos Cloud Storage",
+    "keywords": ["emc","atmos","cloud","storage","php"],
+    "require": {
+        "php": ">=5.2"
+    }
+}
