@@ -1,5 +1,5 @@
 <?php
-// Copyright © 2008 - 2012 EMC Corporation.
+// Copyright ï¿½ 2008 - 2012 EMC Corporation.
 // Redistribution and use in source and binary forms, with or without modification, 
 // are permitted provided that the following conditions are met:
 //
@@ -291,7 +291,10 @@ class EsuRestApi implements EsuApi {
 	 * does not return a checksum from the server, the checksum operation will be skipped.
 	 * @param string $systemTags            the system metadata to return.
 	 * @param string $userTags              the user metadata to return.
+     * @param $limit
+     * @param $token
 	 * @return string the object data read.
+     * @throws EsuException
 	 */
 	public function readObject( $id, $extent = null, $checksum = null,
 			$systemTags = null, $userTags = null, $limit = null, &$token = null ) {
@@ -449,6 +452,7 @@ class EsuRestApi implements EsuApi {
 	/**
 	 * Deletes an object from the cloud.
 	 * @param Identifier $id the identifier of the object to delete.
+     * @throws EsuException
 	 */
 	public function deleteObject( $id ) {
 		// Build the request
@@ -485,6 +489,7 @@ class EsuRestApi implements EsuApi {
 	 * overwritten.  Also note that overwrite operations on files are
 	 * not synchronous; a delay may be required before the object is
 	 * available at its destination.
+     * @throws EsuException
 	 */
 	public function rename( $source, $destination, $force ) {
 		// Build the request
@@ -530,7 +535,12 @@ class EsuRestApi implements EsuApi {
 	/**
 	 * Lists the contents of a directory.
 	 * @param Identifier $id the identifier of the directory object to list.
+     * @param $systemTags
+     * @param $userTags
+     * @param $limit
+     * @param $token
 	 * @return DirectoryEntry array  the directory entries in the directory.
+     * @throws EsuException
 	 */
 	public function listDirectory( $id, $systemTags = null, $userTags = null, $limit = null, &$token = null ) {
 		// Initialize
@@ -606,6 +616,7 @@ class EsuRestApi implements EsuApi {
 	 * one call.
 	 * @param $id Identifier the object's identifier.
 	 * @return ObjectMetadata the object's metadata
+     * @throws EsuException
 	 */
 	public function getAllMetadata( $id ) {
 		// Build the request
@@ -664,6 +675,7 @@ class EsuRestApi implements EsuApi {
 	 * @param MetadataTags $tags A list of system metadata tags to fetch.  Optional.
 	 * Default value is null to fetch all system metadata.
 	 * @return MetadataList The list of system metadata for the object.
+     * @throws EsuException
 	 */
 	public function getSystemMetadata( $id, $tags = null ) {
 		// Build the request
@@ -714,6 +726,7 @@ class EsuRestApi implements EsuApi {
 	 * @param MetadataTags $tags A list of metadata tags to fetch.  Optional.
 	 * Default value is null to fetch all metadata.
 	 * @return MetadataList The list of metadata for the object.
+     * @throws EsuException
 	 */
 	public function getUserMetadata( $id, $tags = null ) {
 		// Build the request
@@ -763,6 +776,7 @@ class EsuRestApi implements EsuApi {
 	 * existing value is replaced.
 	 * @param Identifier $id the identifier of the object to update
 	 * @param MetadataList $metadata metadata to write to the object.
+     * @throws EsuException
 	 */
 	public function setUserMetadata( $id, $metadata ) {
 		// Build the request
@@ -803,6 +817,7 @@ class EsuRestApi implements EsuApi {
 	 * @param Identifier $id the identifier of the object whose metadata to
 	 * delete.
 	 * @param MetadataTags $tags the list of metadata tags to delete.
+     * @throws EsuException
 	 */
 	public function deleteUserMetadata( $id, $tags ) {
 		// Build the request
@@ -844,6 +859,7 @@ class EsuRestApi implements EsuApi {
 	 * Returns the list of user metadata tags assigned to the object.
 	 * @param $id Identifier the object whose metadata tags to list
 	 * @return MetadataTags the list of user metadata tags assigned to the object
+     * @throws EsuException
 	 */
 	public function listUserMetadataTags( $id ) {
 		// Build the request
@@ -885,6 +901,8 @@ class EsuRestApi implements EsuApi {
 	/**
 	 * Lists all objects with the given tag.
 	 * @param MetadataTag|string $queryTag  the tag to search for.
+     * @param $limit
+     * @param $token
 	 * @return array The list of objects with the given tag.  If no objects
 	 * are found the array will be empty.
 	 * @throws EsuException if no objects are found (code 1003)
@@ -935,17 +953,18 @@ class EsuRestApi implements EsuApi {
 		return $objects;
 	} // EsuRestApi::listObjects()
 
-	/**
-	 * Lists all objects with the given tag including their metadata
-	 * @param MetadataTag|string $queryTag  the tag to search for.
-	 * @param string $systemTags            the system metadata to return.
-	 * @param string $userTags              the user metadata to return.
-	 * @return array The list of ObjectResult with the given tag.  If no objects
-	 * are found the array will be empty.
-	 * @throws EsuException if no objects are found (code 1003)
-	 */
-	public function listObjectsWithMetadata( $queryTag, $systemTags = null, $userTags = null,
-			$limit = null, &$token = null ) {
+    /**
+     * Lists all objects with the given tag including their metadata
+     * @param MetadataTag|string $queryTag  the tag to search for.
+     * @param null $systemTags              the system metadata to return.
+     * @param null $userTags                the user metadata to return.
+     * @param null $limit
+     * @param null $token
+     * @return array                        The list of ObjectResult with the given tag.  If no objects
+     * are found the array will be empty.
+     * @throws EsuException
+     */
+    public function listObjectsWithMetadata( $queryTag, $systemTags = null, $userTags = null, $limit = null, &$token = null ) {
 		// If given a MetadataTag object, extract the tag name.
 		if( is_a( $queryTag, 'MetadataTag' ) ) {
 			$queryTag = $queryTag->getName();
@@ -1007,6 +1026,7 @@ class EsuRestApi implements EsuApi {
 	 * @param $tag MetadataTag|string optional.  If specified, the list will
 	 * be limited to the tags under the specified tag.
 	 * @return MetadataTags the list of listable tags.
+     * @throws EsuException
 	 */
 	public function getListableTags( $queryTag = null ) {
 		// If given a MetadataTag object, extract the tag name.
@@ -1053,6 +1073,7 @@ class EsuRestApi implements EsuApi {
 	 * @param string $xquery the XQuery string to execute against the cloud.
 	 * @return array the list of objects matching the query.  If no objects
 	 * are found, the array will be empty.
+     * @throws EsuException
 	 */
 	public function queryObjects( $xquery ) {
 		// Build the request
@@ -1091,6 +1112,7 @@ class EsuRestApi implements EsuApi {
 	 * Returns an object's ACL
 	 * @param Identifier $id the identifier of the object whose ACL to read
 	 * @return Acl the object's ACL
+     * @throws EsuException
 	 */
 	public function getAcl( $id ) {
 		// Build the request
@@ -1128,6 +1150,7 @@ class EsuRestApi implements EsuApi {
 	 * Sets (overwrites) the ACL on the object.
 	 * @param Identifier $id the identifier of the object to change the ACL on.
 	 * @param Acl $acl the new ACL for the object.
+     * @throws EsuException
 	 */
 	public function setAcl( $id, $acl ) {
 		// Build the request
@@ -1197,6 +1220,7 @@ class EsuRestApi implements EsuApi {
 	 * @param ObjectId $id the object whose versions to list.
 	 * @return array The list of versions of the object.  If the object does
 	 * not have any versions, the array will be empty.
+     * @throws EsuException
 	 */
 	public function listVersions( $id ) {
 		// Build the request
@@ -1229,6 +1253,7 @@ class EsuRestApi implements EsuApi {
 	 * Creates a new immutable version of an object.
 	 * @param Identifier $id the object to version
 	 * @return ObjectId the id of the newly created version
+     * @throws EsuException
 	 */
 	public function versionObject( $id ) {
 		// Build the request
@@ -1263,6 +1288,7 @@ class EsuRestApi implements EsuApi {
 	 * old version to the current version)
 	 * @param ObjectId $id Base object ID (target of the restore)
 	 * @param ObjectId $vId Version object ID to restore
+     * @throws EsuException
 	 */
 	public function restoreVersion( $id, $vId ) {
 		// Build the request
@@ -1320,6 +1346,7 @@ class EsuRestApi implements EsuApi {
 	 * Returns policy information about an existing object.
 	 * @param $id Identifier the object's identifier.
 	 * @return ObjectInfo the object's policy information.
+     * @throws EsuException
 	 */
 	public function getObjectInformation( $id ) {
 		// Build the request
@@ -1354,6 +1381,7 @@ class EsuRestApi implements EsuApi {
 	 * Gets information about the Atmos web service.  Currently, this only
 	 * includes the version of Atmos.
 	 * @return ServiceInformation the service information object.
+     * @throws EsuException
 	 */
 	public function getServiceInformation() {
 		// Build the request
@@ -1388,6 +1416,7 @@ class EsuRestApi implements EsuApi {
 	 * with the newly created object.
 	 * @param Acl $acl For upload tokens, an ACL to associate with the newly
 	 * @return string the new access token ID.
+     * @throws EsuException
 	 */
 	public function createAccessToken($policy = NULL, $id = NULL, 
 			$metadata = NULL, $acl = NULL) {
@@ -1465,6 +1494,7 @@ class EsuRestApi implements EsuApi {
 	/**
 	 * Deletes an anonymous access token.
 	 * @param string $tokenId
+     * @throws EsuException
 	 */
 	public function deleteAccessToken($tokenId) {
 		// Build the request
@@ -1492,6 +1522,7 @@ class EsuRestApi implements EsuApi {
 	 * Gets information about an anonymous access token.
 	 * @param string $tokenId
 	 * @return AccessToken the access token info object.
+     * @throws EsuException
 	 */
 	public function getAccessTokenInfo($tokenId) {
 		// Build the request
@@ -1518,17 +1549,17 @@ class EsuRestApi implements EsuApi {
 		// body in an XML format.
 		return AccessToken::fromXml($response->getBody());
 	} // EsuRestApi::getAccessTokenInfo()
-	
-	/**
-	 * Lists access tokens for the current subtenant.  After calling this 
-	 * function, check the paginationToken field on the result.  If it's not 
-	 * NULL, there are more results to fetch.
-	 * @param string $paginationToken the pagination token.  Set to null for
-	 * the first page.
-	 * @param number $limit the number of objects to return per page.
-	 * @return ListAccessTokensResult the list of access tokens.
-	 */
-	public function listAccessTokens($paginationToken=NULL, $limit=0) {
+
+    /**
+     * Lists access tokens for the current subtenant.  After calling this
+     * function, check the paginationToken field on the result.  If it's not
+     * NULL, there are more results to fetch.
+     * @param null $paginationToken the pagination token. Set to null for the first page.
+     * @param int $limit the number of objects to return per page.
+     * @return ListAccessTokensResult the list of access tokens.
+     * @throws EsuException
+     */
+    public function listAccessTokens($paginationToken=NULL, $limit=0) {
 		// Build the request
 		$resource = $this->context . "/accesstokens";
 		$req = $this->buildRequest( $resource, null );
@@ -1586,7 +1617,7 @@ class EsuRestApi implements EsuApi {
 
 	/**
 	 * Returns the Atmos protocol information
-	 * @param $protocolInfo
+	 * @return array $protocolInfo
 	 */
 	public function getProtocolInformation() {
 		$protocolInfo = array();
@@ -1730,6 +1761,7 @@ class EsuRestApi implements EsuApi {
 	 * Creates an HTTP Request
 	 * @param string $resource the resource to access, e.g. /rest/namespace/file.txt
 	 * @param string $query query parameters, may be null, e.g. "versions"
+     * @return mixed
 	 */
 	private function buildRequest( $resource, $query ) {
 		// URLEncode the resource
@@ -1965,6 +1997,7 @@ class EsuRestApi implements EsuApi {
 	/**
 	 * Formats a tag value for passing in the header.
 	 * @param Metadata $meta
+     * @return String
 	 */
 	private function formatTag( $meta ) {
 		if($this->utf8) {
@@ -1985,6 +2018,8 @@ class EsuRestApi implements EsuApi {
 	 * @param string $header the response header to parse
 	 * @param boolean $listable whether to mark the Metadata objects as
 	 * listable or not
+     * @param string $utf8
+     * @return mixed
 	 */
 	private function readMetadata( &$meta, $header, $listable, $utf8 ) {
 		if( $header == null ) {
@@ -2288,6 +2323,7 @@ class EsuRestApi implements EsuApi {
 	/**
 	 * Parse retention information
 	 * @param DOMElement $node
+     * @return ObjectRetention $retention
 	 */
 	private function parseRetention( $node ) {
 		$retention = new ObjectRetention();
@@ -2303,6 +2339,7 @@ class EsuRestApi implements EsuApi {
 	/**
 	 * Parse retention information from a node
 	 * @param DOMElement $node
+     * @return ObjectExpiration $expiration
 	 */
 	private function parseExpiration( $node ) {
 		$expiration = new ObjectExpiration();
@@ -2330,6 +2367,7 @@ class EsuRestApi implements EsuApi {
 	/**
 	 * Parses a replica record
 	 * @param DOMElement $replicaElement
+     * @return ObjectReplica $replica
 	 */
 	private function parseReplica( $replicaElement ) {
 		$replica = new ObjectReplica();
